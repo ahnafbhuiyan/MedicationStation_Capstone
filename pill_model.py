@@ -1,20 +1,23 @@
 import tensorflow as tf
 import numpy as np
-import os
-import PIL
-import PIL.Image
+#import os
+#import PIL
+#import PIL.Image
 import tensorflow_datasets as tfds
 
-mnist = tf.keras.datasets.mnist
+#mnist = tf.keras.datasets.mnist
+print("top")
 
 batch_size = 32
 img_height = 180
 img_width = 180
 
-(x_train, y_train), (x_test, y_test) = mnist.load_data()
-x_train, x_test = x_train / 255.0, x_test / 255.0
+# (x_train, y_train), (x_test, y_test) = mnist.load_data()
+# x_train, x_test = x_train / 255.0, x_test / 255.0
 
-data_dir = 'D:\Documents\Coding\CAPSTONE\ChatGPT\pillbox_production_images_full_202008'
+print("asdasdasdasdad")
+
+data_dir = 'D:\Desktop\School\FOURTH_YEAR\CAPSTONE\MedicationStation_Capstone\Medication_Dataset'
 
 train_ds = tf.keras.utils.image_dataset_from_directory(
   data_dir,
@@ -50,33 +53,39 @@ val_ds = val_ds.cache().prefetch(buffer_size=AUTOTUNE)
 
 
 
-model = tf.keras.models.Sequential([
-  tf.keras.layers.Flatten(input_shape=(28, 28)),
+num_classes = 9
+
+model = tf.keras.Sequential([
+  tf.keras.layers.Rescaling(1./255),
+  tf.keras.layers.Conv2D(32, 3, activation='relu'),
+  tf.keras.layers.MaxPooling2D(),
+  tf.keras.layers.Conv2D(32, 3, activation='relu'),
+  tf.keras.layers.MaxPooling2D(),
+  tf.keras.layers.Conv2D(32, 3, activation='relu'),
+  tf.keras.layers.MaxPooling2D(),
+  tf.keras.layers.Flatten(),
   tf.keras.layers.Dense(128, activation='relu'),
-  tf.keras.layers.Dropout(0.2),
-  tf.keras.layers.Dense(10)
+  tf.keras.layers.Dense(num_classes)
 ])
 
-predictions = model(x_train[:1]).numpy()
-predictions
 
-tf.nn.softmax(predictions).numpy()
+model.compile(
+  optimizer='adam',
+  loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+  metrics=['accuracy'])
 
-loss_fn = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
 
-loss_fn(y_train[:1], predictions).numpy()
+model.fit(
+  train_ds,
+  validation_data=val_ds,
+  epochs=3
+)
 
-model.compile(optimizer='adam',
-              loss=loss_fn,
-              metrics=['accuracy'])
-
-model.fit(x_train, y_train, epochs=5)
-
-model.evaluate(x_test,  y_test, verbose=2)
+model.evaluate(train_ds,  val_ds, verbose=2)
 
 probability_model = tf.keras.Sequential([
   model,
   tf.keras.layers.Softmax()
 ])
 
-probability_model(x_test[:5])
+probability_model(train_ds[:5])
