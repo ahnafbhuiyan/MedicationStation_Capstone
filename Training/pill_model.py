@@ -3,10 +3,10 @@ import numpy as np
 #import os
 #import PIL
 #import PIL.Image
-import tensorflow_datasets as tfds
+#import tensorflow_datasets as tfds
 
 #mnist = tf.keras.datasets.mnist
-print("top")
+
 
 batch_size = 32
 img_height = 180
@@ -81,11 +81,11 @@ model.fit(
   epochs=3
 )
 
-model.evaluate(train_ds,  val_ds, verbose=2)
+model.evaluate(val_ds, verbose=2)
 
-probability_model = tf.keras.Sequential([
-  model,
-  tf.keras.layers.Softmax()
-])
+# probability_model = tf.keras.Sequential([
+#   model,
+#   tf.keras.layers.Softmax()
+# ])
 
-probability_model(train_ds[:5])
+# probability_model(train_ds[:5])
