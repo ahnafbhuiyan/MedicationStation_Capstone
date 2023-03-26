@@ -7,9 +7,12 @@ import tensorflow_datasets as tfds
 import pathlib
 import matplotlib.pyplot as plt
 import cv2
+import serial
+
+ser = serial.Serial('COM7', 9600,timeout=1)
 
 # Load the saved model
-model = tf.keras.models.load_model('pill_identification_model.h5')
+model = tf.keras.models.load_model('pill_identification_model.h5',compile=False)
 
 # Define the input image size
 batch_size = 32
@@ -19,38 +22,34 @@ img_width = 180
 # Load and preprocess the image
 class_names = ['Amlodipine', 'Amoxicillin', 'Atorvastatin', 'Ibuprofen', 'Levothyroxine', 'Lisinopril', 'Losartan', 'Metformin', 'Metoprolol', 'Naproxen', 'Omeprazole', 'Tylenol']
 
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(1)
+
 
 while True:
-    # Read a frame from the webcam
-    ret, frame = cap.read()
-    print(type(frame))
-    # Resize the frame to match the input image size
-    resized_frame = cv2.resize(frame, (img_width, img_height))
-    
-    # Convert the frame to a PIL image
-    # pill_path = PIL.Image.fromarray(resized_frame)
-    # img = np.array(pill_path)
-    pill_path = 'OpenCVImg\pic.jpg'
-    cv2.imwrite(pill_path,resized_frame)
-    img = tf.keras.utils.load_img(
-        pill_path, target_size=(img_height, img_width)
-    )
-    img_array = tf.keras.utils.img_to_array(img)
-    img_array = tf.expand_dims(img_array, 0) # Create a batch
+    input("Press Enter to start")
+    ser.write(b's')
+    if ser.in_waiting > 0:
+        print("Message Recieved")
+        message = ser.readline().decode()# Read the serial signal
+        if message == "Done\r\n":
+            print("Stepper motor has completed its rotation.") 
+            # Read a frame from the webcam
+            ret, frame = cap.read()
+            # Resize the frame to match the input image size
+            resized_frame = cv2.resize(frame, (img_width, img_height))
+            pill_path = 'OpenCVImg\pic.jpg'
+            cv2.imwrite(pill_path,resized_frame)
+            img = tf.keras.utils.load_img(
+                pill_path, target_size=(img_height, img_width)
+            )
+            img_array = tf.keras.utils.img_to_array(img)
+            img_array = tf.expand_dims(img_array, 0) # Create a batch
 
-    predictions = model.predict(img_array)
-    score = tf.nn.softmax(predictions[0])
+            predictions = model.predict(img_array)
+            score = tf.nn.softmax(predictions[0])
 
-    print(
-        "This image most likely belongs to {} with a {:.2f} percent confidence."
-        .format(class_names[np.argmax(score)], 100 * np.max(score))
-    )
+            print(
+                "This image most likely belongs to {} with a {:.2f} percent confidence."
+                .format(class_names[np.argmax(score)], 100 * np.max(score))
+            )
 
-    # Exit if the 'q' key is pressed
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
-
-# Release the webcam and close the window
-cap.release()
-cv2.destroyAllWindows()
