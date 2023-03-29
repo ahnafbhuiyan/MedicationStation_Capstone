@@ -7,10 +7,12 @@ import tensorflow_datasets as tfds
 import pathlib
 import matplotlib.pyplot as plt
 
-data_dir = 'D:\Documents\Coding\CAPSTONE\Medication_Dataset'
+data_dir = 'D:\Desktop\School\FOURTH_YEAR\CAPSTONE\MedicationStation_Capstone\SmallDataset'
+data_dir_l = pathlib.Path(data_dir).with_suffix('')
 
-# image_count = len(list(data_dir.glob('*/*.jpg')))
-# print(image_count)
+
+image_count = len(list(data_dir_l.glob('*/*.jpg')))
+print(image_count)
 
 batch_size = 32
 img_height = 180
@@ -72,14 +74,14 @@ model.compile(
 
 #model.summary()
 
-epochs = 10
+epochs = 20
 history = model.fit(
   train_ds,
   validation_data=val_ds,
   epochs=epochs
 )
 
-model.save('pill_identification_model.h5')
+model.save('D:\Desktop\School\FOURTH_YEAR\CAPSTONE\MedicationStation_Capstone\Model\pill_identification_model_SMALL.h5')
 
 acc = history.history['accuracy']
 val_acc = history.history['val_accuracy']
@@ -103,20 +105,20 @@ epochs_range = range(epochs)
 # plt.title('Training and Validation Loss')
 # plt.show()
 
-pill_path = 'D:\Documents\Coding\CAPSTONE\Medication_Dataset\Metoprolol\dwibo.png'
+# pill_path = 'D:\Documents\Coding\CAPSTONE\Medication_Dataset\Metoprolol\dwibo.png'
 
-img = tf.keras.utils.load_img(
-    pill_path, target_size=(img_height, img_width)
-)
-img_array = tf.keras.utils.img_to_array(img)
-img_array = tf.expand_dims(img_array, 0) # Create a batch
+# img = tf.keras.utils.load_img(
+#     pill_path, target_size=(img_height, img_width)
+# )
+# img_array = tf.keras.utils.img_to_array(img)
+# img_array = tf.expand_dims(img_array, 0) # Create a batch
 
-predictions = model.predict(img_array)
-score = tf.nn.softmax(predictions[0])
+# predictions = model.predict(img_array)
+# score = tf.nn.softmax(predictions[0])
 
-print(
-    "This image most likely belongs to {} with a {:.2f} percent confidence."
-    .format(class_names[np.argmax(score)], 100 * np.max(score))
-)
+# print(
+#     "This image most likely belongs to {} with a {:.2f} percent confidence."
+#     .format(class_names[np.argmax(score)], 100 * np.max(score))
+# )
 
 

@@ -27,8 +27,8 @@ cap = cv2.VideoCapture(1)
 
 
 while True:
-    input("Press Enter to start")
-    ser.write(b's')
+    # input("Press Enter to start")
+    # ser.write(b's')
     if ser.in_waiting > 0:
         print("Message Recieved")
         message = ser.readline().decode()# Read the serial signal
